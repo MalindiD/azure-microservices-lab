@@ -1,13 +1,14 @@
-# Lab 07 — Tasks 2–4 (after Task 1: run `az login` and set subscription if needed)
+# Lab 07 - Tasks 2-4 (after Task 1: run `az login` and set subscription if needed)
 # Usage: edit variables below, then: .\scripts\azure-lab-tasks-2-4.ps1
 # Requires: Docker Desktop running, Azure CLI, logged-in `az` session.
 
 $ErrorActionPreference = "Stop"
 
 $ResourceGroup = "microservices-rg"
-$Location      = "eastus"
-# Must be globally unique; append student ID if name is taken:
-$AcrName       = "sliitmicroregistry"
+# SLIIT / Azure for Students often blocks "eastus" - use an allowed region (try southeastasia first).
+$Location      = "southeastasia"
+# Must be globally unique (5-50 chars, letters and digits only, lowercase):
+$AcrName       = "sliitmicroregistryit22901644"
 $EnvName       = "micro-env"
 $AppName       = "gateway"
 $ImageTag      = "v1"
@@ -18,8 +19,11 @@ $imageFull      = "$acrLoginServer/${AppName}:${ImageTag}"
 Write-Host "Creating resource group..." -ForegroundColor Cyan
 az group create --name $ResourceGroup --location $Location | Out-Null
 
-Write-Host "Creating Azure Container Registry ($AcrName)..." -ForegroundColor Cyan
-az acr create --resource-group $ResourceGroup --name $AcrName --sku Basic
+Write-Host 'Registering Microsoft.ContainerRegistry provider (first-time; may take 1-2 min)...' -ForegroundColor Cyan
+az provider register --namespace Microsoft.ContainerRegistry --wait
+
+Write-Host "Creating Azure Container Registry ($AcrName) in $Location ..." -ForegroundColor Cyan
+az acr create --resource-group $ResourceGroup --name $AcrName --sku Basic --location $Location
 
 Write-Host "Logging Docker into ACR..." -ForegroundColor Cyan
 az acr login --name $AcrName
